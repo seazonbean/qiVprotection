@@ -34,7 +34,6 @@
                 </h1>
                 <div class="text-white text-sm">
                     <span class="hidden md:inline-block mr-4">技术团队：SeazonBean组</span>
-                    <!-- 删除设置按钮（无后端联动） -->
                 </div>
             </div>
         </div>
@@ -116,8 +115,6 @@
                     <button id="new-link-btn" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 px-4 rounded-lg transition">
                         <i class="fas fa-plus mr-2"></i>新建链接
                     </button>
-                    <!-- 删除二维码生成按钮（无后端联动） -->
-                    <!-- 删除统计分析按钮（无后端联动） -->
                 </div>
             </div>
         </div>
@@ -176,8 +173,10 @@
             const refreshBtn = document.getElementById('refresh-btn');
             const clearBtn = document.getElementById('clear-btn');
             
-            // 加载历史记录
+            // 加载历史记录（临时注释，等待后端实现）
             async function loadHistory() {
+                document.getElementById('history-list').innerHTML = '<p class="text-gray-500 text-center py-4">历史记录功能暂未实现</p>';
+                /*
                 try {
                     const response = await fetch('/api/history');
                     if (!response.ok) throw new Error('获取历史记录失败');
@@ -213,7 +212,7 @@
                         
                         // 添加复制功能
                         historyItem.querySelector('.copy-history-btn').addEventListener('click', () => {
-                            navigator.clipboard.writeText(`https://${item.short_url}`)
+                            navigator.clipboard.writeText(item.short_url)
                                 .then(() => {
                                     const btn = historyItem.querySelector('.copy-history-btn');
                                     btn.innerHTML = '<i class="fas fa-check"></i>';
@@ -234,6 +233,7 @@
                     console.error(error);
                     alert(error.message);
                 }
+                */
             }
             
             // 叠甲新链接
@@ -251,7 +251,8 @@
                 generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>生成中...';
                 
                 try {
-                    const response = await fetch('/api/generate', {
+                    // 修复API路径：将/api/generate改为/api/shorten
+                    const response = await fetch('/api/shorten', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ 
@@ -270,15 +271,14 @@
                     
                     // 更新UI
                     document.getElementById('short-url').textContent = data.short_url;
-                    document.getElementById('create-time').textContent = data.created_at;
-                    document.getElementById('expiry-time').textContent = data.expires_at;
-                    document.getElementById('visit-count').textContent = data.visit_count;
+                    document.getElementById('create-time').textContent = new Date().toLocaleString();
+                    document.getElementById('expiry-time').textContent = data.expires_at ? 
+                        new Date(data.expires_at).toLocaleString() : '永久';
+                    document.getElementById('visit-count').textContent = '0';
                     
                     // 显示结果区域
                     resultSection.classList.remove('hidden');
                     
-                    // 刷新历史记录
-                    await loadHistory();
                 } catch (error) {
                     alert(error.message);
                 } finally {
@@ -287,10 +287,10 @@
                 }
             });
             
-            // 复制功能
+            // 复制功能（修复重复添加协议问题）
             document.getElementById('copy-btn').addEventListener('click', function() {
                 const shortUrl = document.getElementById('short-url').textContent;
-                navigator.clipboard.writeText(`https://${shortUrl}`)
+                navigator.clipboard.writeText(shortUrl)  // 直接使用完整链接
                     .then(() => {
                         const btn = document.getElementById('copy-btn');
                         btn.innerHTML = '<i class="fas fa-check mr-1"></i>已复制';
@@ -316,8 +316,10 @@
             // 刷新历史记录
             refreshBtn.addEventListener('click', loadHistory);
             
-            // 清除历史记录（如果后端支持）
+            // 清除历史记录（临时注释）
             clearBtn.addEventListener('click', async function() {
+                alert('历史记录功能暂未实现');
+                /*
                 if (confirm('确定要清空历史记录吗？')) {
                     try {
                         const response = await fetch('/api/history', { method: 'DELETE' });
@@ -327,6 +329,7 @@
                         alert(error.message);
                     }
                 }
+                */
             });
             
             // 初始加载历史记录

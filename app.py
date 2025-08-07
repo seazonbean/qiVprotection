@@ -1,9 +1,10 @@
 import os
+import re
 import sqlite3
 import string
 import random
 from datetime import datetime, timedelta
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, redirect  # 添加redirect导入
 from dotenv import load_dotenv
 
 # 加载环境变量
@@ -11,7 +12,7 @@ load_dotenv()
 
 app = Flask(__name__, static_folder='static')
 app.config['DATABASE'] = os.path.join(os.path.dirname(__file__), 'shortener.db')
-app.config['SITE_DOMAIN'] = os.getenv('SITE_DOMAIN', 'localhost:5000')
+app.config['SITE_DOMAIN'] = os.getenv('SITE_DOMAIN', 'your-vercel-app.vercel.app')  # 设置默认域名
 
 # 数据库连接管理
 def get_db():
@@ -58,15 +59,22 @@ def index():
 def shorten_url():
     data = request.json
     original_url = data.get('url')
-    custom_code = data.get('custom')
-    expires_in = data.get('expires', '30d')  # 默认30天
+    custom_code = data.get('alias')  # 修复参数名：从custom改为alias
+    expires_in = data.get('expiry', '30d')  # 修复参数名：从expires改为expiry
 
     # 验证URL
     if not original_url:
         return jsonify({'error': 'URL is required'}), 400
 
     # 处理过期时间
-    days = int(expires_in.replace('d', '')) if expires_in != 'never' else None
+    if expires_in == 'forever':
+        days = None
+    else:
+        try:
+            days = int(expires_in.replace('d', ''))
+        except ValueError:
+            return jsonify({'error': 'Invalid expiry format'}), 400
+            
     expires_at = datetime.now() + timedelta(days=days) if days else None
 
     db = get_db()
@@ -75,6 +83,10 @@ def shorten_url():
     try:
         # 处理自定义短码
         if custom_code:
+            # 验证自定义短码格式（仅允许字母、数字和短横线）
+            if not re.match(r'^[a-zA-Z0-9-]+$', custom_code):
+                return jsonify({'error': 'Custom code can only contain letters, numbers and hyphens'}), 400
+                
             # 检查自定义短码是否已存在
             cursor.execute('SELECT id FROM links WHERE short_code = ?', (custom_code,))
             if cursor.fetchone():
@@ -109,7 +121,7 @@ def shorten_url():
     finally:
         db.close()
 
-# 短链接跳转
+# 短链接跳转（修复重定向逻辑）
 @app.route('/<short_code>')
 def redirect_to_original(short_code):
     db = get_db()
@@ -137,8 +149,8 @@ def redirect_to_original(short_code):
         )
         db.commit()
 
-        # 重定向
-        return jsonify({'redirect': link['original_url']}), 302
+        # 修复：使用redirect函数进行重定向
+        return redirect(link['original_url'], code=302)
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -181,4 +193,3 @@ if __name__ == '__main__':
         port=int(os.getenv('PORT', 5000)),
         debug=os.getenv('FLASK_ENV') == 'development'
     )
-    

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>企薇黄金甲 | 技术团队：SeazonBean组</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .link-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .copy-btn:active {
+            transform: scale(0.95);
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <header class="bg-gradient-to-r from-blue-600 to-indigo-700 shadow-lg">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-white flex items-center">
+                    <i class="fas fa-link mr-3"></i>
+                    企V黄金甲
+                    <span class="ml-4 text-xs bg-white text-blue-600 px-2 py-1 rounded-full">v2.1.0</span>
+                </h1>
+                <div class="text-white text-sm">
+                    <span class="hidden md:inline-block mr-4">技术团队：SeazonBean组</span>
+                    <button id="settings-btn" class="hover:text-blue-200">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-md overflow-hidden p-6 mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-plus-circle text-blue-500 mr-2"></i>
+                叠甲新链接
+            </h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">原始URL</label>
+                    <input type="url" id="original-url" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                           placeholder="https://example.com/very/long/url/path" required>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">自定义后缀（可选）</label>
+                        <div class="flex">
+                            <span class="inline-flex items-center px-3 py-2 border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm rounded-l-lg">
+                                yourdomain.com/
+                            </span>
+                            <input type="text" id="custom-alias" 
+                                   class="flex-1 min-w-0 block w-full px-3 py-2 border border-gray-300 rounded-r-lg focus:ring-blue-500 focus:border-blue-500" 
+                                   placeholder="mylink" pattern="[a-zA-Z0-9-]+" title="仅允许字母、数字和短横线">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">有效期</label>
+                        <select id="expiry" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                            <option value="7d">7天</option>
+                            <option value="30d" selected>30天</option>
+                            <option value="forever">永久</option>
+                        </select>
+                    </div>
+                </div>
+                <button id="generate-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 flex items-center justify-center">
+                    <i class="fas fa-magic mr-2"></i>
+                    叠甲
+                </button>
+            </div>
+        </div>
+
+        <div id="result-section" class="hidden max-w-3xl mx-auto bg-white rounded-xl shadow-md overflow-hidden p-6 mb-8 fade-in">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                生成成功！
+            </h2>
+            <div class="space-y-4">
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div class="flex items-center justify-between">
+                        <div class="truncate">
+                            <p class="text-sm font-medium text-blue-800">短链接</p>
+                            <p id="short-url" class="text-lg font-bold text-blue-600 truncate"></p>
+                        </div>
+                        <button id="copy-btn" class="copy-btn bg-white text-blue-600 border border-blue-300 px-3 py-1 rounded-lg text-sm font-medium hover:bg-blue-50 transition">
+                            <i class="fas fa-copy mr-1"></i>复制
+                        </button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                    <div class="bg-gray-50 p-3 rounded-lg">
+                        <p class="text-sm text-gray-500">创建时间</p>
+                        <p id="create-time" class="font-medium"></p>
+                    </div>
+                    <div class="bg-gray-50 p-3 rounded-lg">
+                        <p class="text-sm text-gray-500">过期时间</p>
+                        <p id="expiry-time" class="font-medium"></p>
+                    </div>
+                    <div class="bg-gray-50 p-3 rounded-lg">
+                        <p class="text-sm text-gray-500">访问次数</p>
+                        <p id="visit-count" class="font-medium">0</p>
+                    </div>
+                </div>
+                <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
+                    <button id="new-link-btn" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 px-4 rounded-lg transition">
+                        <i class="fas fa-plus mr-2"></i>新建链接
+                    </button>
+                    <button id="qr-btn" class="flex-1 bg-green-100 hover:bg-green-200 text-green-800 font-medium py-2 px-4 rounded-lg transition">
+                        <i class="fas fa-qrcode mr-2"></i>生成二维码
+                    </button>
+                    <button id="analytics-btn" class="flex-1 bg-purple-100 hover:bg-purple-200 text-purple-800 font-medium py-2 px-4 rounded-lg transition">
+                        <i class="fas fa-chart-bar mr-2"></i>查看统计
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                        <i class="fas fa-history text-indigo-500 mr-2"></i>
+                        历史记录
+                    </h2>
+                    <div class="flex space-x-2">
+                        <button id="refresh-btn" class="text-gray-500 hover:text-blue-600 p-1 rounded-full">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                        <button id="clear-btn" class="text-gray-500 hover:text-red-600 p-1 rounded-full">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="history-list" class="space-y-3">
+                    <!-- 动态加载历史记录 -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-100 border-t mt-12">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="text-gray-600 text-sm mb-4 md:mb-0">
+                    <p>© 2025 企薇黄金甲 - 技术团队：四季逗荣誉出品</p>
+                    <p class="mt-1">版本 v2.1.0 | 最后更新 2025-08-06</p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-500 hover:text-blue-600">
+                        <i class="fab fa-github"></i>
+                    </a>
+                    <a href="#" class="text-gray-500 hover:text-blue-600">
+                        <i class="fas fa-question-circle"></i>
+                    </a>
+                    <a href="#" class="text-gray-500 hover:text-blue-600">
+                        <i class="fas fa-envelope"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const generateBtn = document.getElementById('generate-btn');
+            const resultSection = document.getElementById('result-section');
+            const newLinkBtn = document.getElementById('new-link-btn');
+            const refreshBtn = document.getElementById('refresh-btn');
+            
+            // 加载历史记录
+            async function loadHistory() {
+                try {
+                    const response = await fetch('/api/history');
+                    if (!response.ok) throw new Error('获取历史记录失败');
+                    
+                    const history = await response.json();
+                    const historyList = document.getElementById('history-list');
+                    historyList.innerHTML = '';
+                    
+                    if (history.length === 0) {
+                        historyList.innerHTML = '<p class="text-gray-500 text-center py-4">暂无历史记录</p>';
+                        return;
+                    }
+                    
+                    history.forEach(item => {
+                        const historyItem = document.createElement('div');
+                        historyItem.className = 'link-card bg-gray-50 border border-gray-200 rounded-lg p-4 transition duration-200 hover:shadow-md';
+                        historyItem.innerHTML = `
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-900 truncate">${item.original_url}</p>
+                                    <div class="flex items-center mt-1">
+                                        <p class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded mr-2">${item.short_url}</p>
+                                        <p class="text-xs text-gray-500">${item.created_at}</p>
+                                    </div>
+                                </div>
+                                <div class="ml-4 flex space-x-2">
+                                    <button class="copy-history-btn text-gray-400 hover:text-blue-500 p-1">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                        
+                        // 添加复制功能
+                        historyItem.querySelector('.copy-history-btn').addEventListener('click', () => {
+                            navigator.clipboard.writeText(`https://${item.short_url}`)
+                                .then(() => {
+                                    const btn = historyItem.querySelector('.copy-history-btn');
+                                    btn.innerHTML = '<i class="fas fa-check"></i>';
+                                    btn.classList.remove('text-gray-400', 'hover:text-blue-500');
+                                    btn.classList.add('text-green-500');
+                                    
+                                    setTimeout(() => {
+                                        btn.innerHTML = '<i class="fas fa-copy"></i>';
+                                        btn.classList.remove('text-green-500');
+                                        btn.classList.add('text-gray-400', 'hover:text-blue-500');
+                                    }, 2000);
+                                });
+                        });
+                        
+                        historyList.appendChild(historyItem);
+                    });
+                } catch (error) {
+                    console.error(error);
+                    alert(error.message);
+                }
+            }
+            
+            // 叠甲新链接
+            generateBtn.addEventListener('click', async function() {
+                const originalUrl = document.getElementById('original-url').value;
+                const customAlias = document.getElementById('custom-alias').value;
+                const expiry = document.getElementById('expiry').value;
+                
+                if (!originalUrl) {
+                    alert('请输入有效的URL');
+                    return;
+                }
+                
+                generateBtn.disabled = true;
+                generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>生成中...';
+                
+                try {
+                    const response = await fetch('/api/generate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            url: originalUrl,
+                            alias: customAlias,
+                            expiry: expiry
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || '叠甲失败');
+                    }
+                    
+                    const data = await response.json();
+                    
+                    // 更新UI
+                    document.getElementById('short-url').textContent = data.short_url;
+                    document.getElementById('create-time').textContent = data.created_at;
+                    document.getElementById('expiry-time').textContent = data.expires_at;
+                    document.getElementById('visit-count').textContent = data.visit_count;
+                    
+                    // 显示结果区域
+                    resultSection.classList.remove('hidden');
+                    
+                    // 刷新历史记录
+                    await loadHistory();
+                } catch (error) {
+                    alert(error.message);
+                } finally {
+                    generateBtn.disabled = false;
+                    generateBtn.innerHTML = '<i class="fas fa-magic mr-2"></i>生成短链接';
+                }
+            });
+            
+            // 复制功能
+            document.getElementById('copy-btn').addEventListener('click', function() {
+                const shortUrl = document.getElementById('short-url').textContent;
+                navigator.clipboard.writeText(`https://${shortUrl}`)
+                    .then(() => {
+                        const btn = document.getElementById('copy-btn');
+                        btn.innerHTML = '<i class="fas fa-check mr-1"></i>已复制';
+                        btn.classList.remove('text-blue-600', 'border-blue-300');
+                        btn.classList.add('text-green-600', 'border-green-300');
+                        
+                        setTimeout(() => {
+                            btn.innerHTML = '<i class="fas fa-copy mr-1"></i>复制';
+                            btn.classList.remove('text-green-600', 'border-green-300');
+                            btn.classList.add('text-blue-600', 'border-blue-300');
+                        }, 2000);
+                    });
+            });

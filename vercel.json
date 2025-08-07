@@ -23,7 +23,7 @@
   ],
   "env": {
     "FLASK_ENV": "production",
-    "SITE_DOMAIN": ""  // 部署后从Vercel控制台设置
+    "SITE_DOMAIN": "your-vercel-app.vercel.app"  // 设置默认域名
   }
 }
     
